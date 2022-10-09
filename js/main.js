@@ -70,4 +70,4 @@ const createPhoto = () => {
   };
 };
 
-const similarUsers = Array.from({length: 25}, createPhoto);
+Array.from({length: 25}, createPhoto);
