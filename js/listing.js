@@ -1,4 +1,6 @@
 import {createPhotos} from './data.js';
+import {showModal} from './details.js';
+
 const renderListing = function () {
   const photos = createPhotos();
   const listing = document.querySelector('.pictures');
@@ -18,6 +20,17 @@ const renderListing = function () {
   }
 
   listing.appendChild(fragment);
+
+  const thumbnails = document.querySelectorAll('.picture');
+  const addThumbnailClickHandler = function (thumbnail, photo) {
+    thumbnail.addEventListener('click', (evt) => {
+      evt.preventDefault();
+      showModal(photo);
+    });
+  };
+  for (let i = 0; i <= thumbnails.length - 1; i++) {
+    addThumbnailClickHandler(thumbnails[i], photos[i]);
+  }
 };
 
 export {renderListing};
