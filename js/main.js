@@ -1,2 +1,3 @@
 import './util.js';
-import {createPhotos} from './data.js';
+import {renderListing} from './listing.js';
+renderListing();
