@@ -1,5 +1,5 @@
 const bigPicture = document.querySelector('.big-picture');
-const body = document.querySelector('body');
+const body = document.body;
 const bigPictureImg = bigPicture.querySelector('.big-picture__img img');
 const bigPictureLikes = bigPicture.querySelector('.likes-count');
 const bigPictureCommentsCount = bigPicture.querySelector('.comments-count');
@@ -47,7 +47,7 @@ const closeModal = function () {
   bigPictureSocCount.classList.remove('hidden');
 };
 
-document.body.addEventListener('keypress', (evt) => {
+document.body.addEventListener('keydown', (evt) => {
   if (evt.key === 'Escape') {
     closeModal();
   }
