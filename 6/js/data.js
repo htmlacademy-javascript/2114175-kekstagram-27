@@ -9,22 +9,8 @@ let commentId = 0;
 const getCommentId = () => ++commentId;
 
 // Генерируем случайные пути к фото
-const generatedPhotoIds = [];
-const minPhotoNum = 1;
 const maxPhotoNum = 25;
-const generateUniquePhotoId = () => {
-  if (generatedPhotoIds.length === maxPhotoNum) {
-    throw new Error('Maximum photos ids exceeded!');
-  }
-
-  let photoId = getRandomPositiveInteger(minPhotoNum, maxPhotoNum);
-  while (generatedPhotoIds.includes(photoId)) {
-    photoId = getRandomPositiveInteger(minPhotoNum, maxPhotoNum);
-  }
-  generatedPhotoIds.push(photoId);
-  return photoId;
-};
-const generatePhotoPath = () => `photos/${generateUniquePhotoId()}.jpg`;
+const generatePhotoPath = (id) => `photos/${id}.jpg`;
 
 // Массивы данных
 const photoDescriptions = [
@@ -75,7 +61,7 @@ const createPhoto = () => {
   const id = getPhotoId();
   return {
     id: id,
-    url: generatePhotoPath(),
+    url: generatePhotoPath(id),
     description: getRandomArrayElement(photoDescriptions),
     likes: generateLikesNum(),
     //  функция создающая массив, длиной от 1 до 2, и заполняет массив сгенерированными коментами
