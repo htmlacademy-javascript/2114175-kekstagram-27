@@ -1,3 +1,16 @@
-import './util.js';
 import {renderListing} from './listing.js';
-renderListing();
+import './util.js';import {createPhotos} from './data.js';
+import {showModal} from './details.js';
+const photos = createPhotos();
+renderListing(photos);
+
+const thumbnails = document.querySelectorAll('.picture');
+const addThumbnailClickHandler = function (thumbnail, photo) {
+  thumbnail.addEventListener('click', (evt) => {
+    evt.preventDefault();
+    showModal(photo);
+  });
+};
+for (let i = 0; i <= thumbnails.length - 1; i++) {
+  addThumbnailClickHandler(thumbnails[i], photos[i]);
+}
