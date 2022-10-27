@@ -5,7 +5,12 @@ const commentInput = document.querySelector('.text__description');
 const cancel = document.querySelector('#upload-cancel');
 const uploadOverlay = document.querySelector('.img-upload__overlay');
 const uploadPreview = document.querySelector('.img-upload__preview img');
+const HASHTAGS_MAX_LENGTH = 5;
+const HASHTAG_MIN_LENGTH = 2;
+const HASHTAG_MAX_LENGTH = 20;
+const COMMENT_MAX_LENGTH = 140;
 
+// создаем валидатор формы
 const pristine = new Pristine(uploadForm, {
   classTo: 'img-upload__field-wrapper',
   errorClass: 'invalid',
@@ -15,6 +20,7 @@ const pristine = new Pristine(uploadForm, {
   errorTextClass: 'text-error'
 }, false);
 
+// функция валидации поля хэштеги
 function validateHashtags (value) {
   // Нет хэштегов
   if(value === '') {
@@ -27,23 +33,21 @@ function validateHashtags (value) {
     .split(' ');
 
   // не больше 5 хэштегов
-  if (hashtags.length > 5) {
+  if (hashtags.length > HASHTAGS_MAX_LENGTH) {
     return false;
   }
 
   // только уникальные хэштеги
   const uniqueHashtags = hashtags
     .map((hashtag) => hashtag.toLowerCase())
-    .filter((hashtag, index, self) => {
-      return self.indexOf(hashtag) === index;
-    });
+    .filter((hashtag, index, self) => self.indexOf(hashtag) === index);
   if (uniqueHashtags.length < hashtags.length) {
     return false;
   }
 
   return hashtags.every((hashtag) => {
     // длина от 2 до 20 символов
-    if (hashtag.length < 2 || hashtag.length > 20) {
+    if (hashtag.length < HASHTAG_MIN_LENGTH || hashtag.length > HASHTAG_MAX_LENGTH) {
       return false;
     }
     // начинается с #
@@ -59,30 +63,27 @@ function validateHashtags (value) {
   });
 }
 
+// связываем валидатор с полем хэштеги
 pristine.addValidator(
   uploadForm.querySelector('.text__hashtags'),
   validateHashtags,
   'Неверные хэштеги'
 );
 
+// функция валидации поля описание
 function validateComment (value) {
-  return value.length <= 140;
+  return value.length <= COMMENT_MAX_LENGTH;
 }
 
+// связываем валидатор с полем описание
 pristine.addValidator(
   uploadForm.querySelector('.text__description'),
   validateComment,
   'Неверный комментарий'
 );
 
-uploadForm.onsubmit = (evt) => {
-  evt.preventDefault();
-  const valid = pristine.validate();
-  if (valid) {
-    // todo submit
-  }
-};
 
+// открытие формы
 const showForm = (file) => {
   // заменяем тестовую картинку
   uploadPreview.src = URL.createObjectURL(file);
@@ -91,7 +92,11 @@ const showForm = (file) => {
   document.body.classList.add('modal-open');
 };
 
+// закрытие формы
 const closeForm = () => {
+  // сбрасываем ошибки
+  pristine.reset();
+
   // скрываем форму
   uploadOverlay.classList.add('hidden');
   document.body.classList.remove('modal-open');
@@ -111,6 +116,15 @@ const registerUploadFormEvents = () => {
     }
   });
   cancel.addEventListener('click', closeForm);
+
+  // событие на отправку
+  uploadForm.onsubmit = (evt) => {
+    evt.preventDefault();
+    const valid = pristine.validate();
+    if (valid) {
+      // todo submit
+    }
+  };
 };
 
 export {registerUploadFormEvents};
