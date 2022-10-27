@@ -64,8 +64,8 @@ const createPhoto = () => {
     url: generatePhotoPath(id),
     description: getRandomArrayElement(photoDescriptions),
     likes: generateLikesNum(),
-    //  функция создающая массив, длиной от 1 до 2, и заполняет массив сгенерированными коментами
-    comments: Array.from({length: getRandomPositiveInteger(1, 2)}, createComment),
+    //  функция создающая массив, длиной от 1 до 20, и заполняет массив сгенерированными коментами
+    comments: Array.from({length: getRandomPositiveInteger(1, 20)}, createComment),
   };
 };
 

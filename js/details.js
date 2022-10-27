@@ -6,21 +6,20 @@ const bigPictureCommentsCount = bigPicture.querySelector('.comments-count');
 const bigPictureComments = bigPicture.querySelector('.social__comments');
 const bigPictureDescription = bigPicture.querySelector('.social__caption');
 const bigPictureComLoader = bigPicture.querySelector('.comments-loader');
-const bigPictureSocCount = bigPicture.querySelector('.social__comment-count');
+const bigPictureComCount = bigPicture.querySelector('.social__comment-count');
 const bigPictureClose = bigPicture.querySelector('.cancel');
-
 const fragmentComment = document.createDocumentFragment();
+const COMMENTS_PER_PAGE = 5;
+let showCommentsCounter = 0;
 
-const showModal = function (photo) {
-  bigPicture.classList.remove('hidden');
-  body.classList.add('modal-open');
-  bigPictureImg.src = photo.url;
-  bigPictureLikes.textContent = photo.likes;
-  bigPictureCommentsCount.textContent = photo.comments.length;
-  bigPictureDescription.textContent = photo.description;
+const showMoreComments = (photo) => {
+  // берем часть комментариев
+  const comments = photo.comments.slice(showCommentsCounter, showCommentsCounter + COMMENTS_PER_PAGE);
+  showCommentsCounter += comments.length;
 
-  for (let i = 0; i <= photo.comments.length - 1; i++) {
-    const photoComment = photo.comments[i];
+  // выводим комментарии
+  for (let i = 0; i <= comments.length - 1; i++) {
+    const photoComment = comments[i];
     const comment = document.createElement('li');
     const commentImg = document.createElement('img');
     const commentText = document.createElement('p');
@@ -33,18 +32,49 @@ const showModal = function (photo) {
     commentText.textContent = photoComment.message;
     fragmentComment.appendChild(comment);
   }
-
-  bigPictureComments.innerHTML = '';
   bigPictureComments.appendChild(fragmentComment);
-  bigPictureComLoader.classList.add('hidden');
-  bigPictureSocCount.classList.add('hidden');
+
+
+  if (photo.comments.length <= COMMENTS_PER_PAGE) {
+    // если комментов не больше 5, скрываем счетчик
+    bigPictureComCount.classList.add('hidden');
+  } else {
+    // обновляем отображаемый счетчик комментариев
+    bigPictureComCount.innerHTML = `${showCommentsCounter} из <span class="comments-count">${photo.comments.length}</span> комментариев`;
+  }
+
+  // скрываем "загрузить новые комментарии" если конец списка
+  if (showCommentsCounter === photo.comments.length ) {
+    bigPictureComLoader.classList.add('hidden');
+  }
+};
+
+const showModal = function (photo) {
+  bigPicture.classList.remove('hidden');
+  body.classList.add('modal-open');
+  bigPictureImg.src = photo.url;
+  bigPictureLikes.textContent = photo.likes;
+  bigPictureCommentsCount.textContent = photo.comments.length;
+  bigPictureDescription.textContent = photo.description;
+
+  // очищаем комментарии
+  bigPictureComments.innerHTML = '';
+  // обнуляем счетчик показанных комментариев
+  showCommentsCounter = 0;
+  // показываем первые 5 комментариев
+  showMoreComments(photo);
+
+  // добавляем событие за загрузку новых комментариев
+  bigPictureComLoader.onclick = () => {
+    showMoreComments(photo);
+  };
 };
 
 const closeModal = function () {
   bigPicture.classList.add('hidden');
   body.classList.remove('modal-open');
   bigPictureComLoader.classList.remove('hidden');
-  bigPictureSocCount.classList.remove('hidden');
+  bigPictureComCount.classList.remove('hidden');
 };
 
 document.body.addEventListener('keydown', (evt) => {
