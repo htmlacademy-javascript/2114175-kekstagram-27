@@ -119,10 +119,9 @@ const registerUploadFormEvents = () => {
 
   // событие на отправку
   uploadForm.onsubmit = (evt) => {
-    evt.preventDefault();
     const valid = pristine.validate();
-    if (valid) {
-      // todo submit
+    if (!valid) {
+      evt.preventDefault();
     }
   };
 };
