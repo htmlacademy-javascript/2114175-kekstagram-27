@@ -5,10 +5,30 @@ const commentInput = document.querySelector('.text__description');
 const cancel = document.querySelector('#upload-cancel');
 const uploadOverlay = document.querySelector('.img-upload__overlay');
 const uploadPreview = document.querySelector('.img-upload__preview img');
+const scaleUp = document.querySelector('.scale__control--bigger');
+const scaleDown = document.querySelector('.scale__control--smaller');
+const scaleValue = document.querySelector('.scale__control--value');
+const effectLevel = document.querySelector('.effect-level');
+const effectLevelValue = document.querySelector('.effect-level__value');
+const effectLevelSlider = document.querySelector('.effect-level__slider');
 const HASHTAGS_MAX_LENGTH = 5;
 const HASHTAG_MIN_LENGTH = 2;
 const HASHTAG_MAX_LENGTH = 20;
 const COMMENT_MAX_LENGTH = 140;
+const SCALE_STEP = 25;
+const SCALE_MIN = 25;
+const SCALE_MAX = 100;
+
+// создаем слайдер
+noUiSlider.create(effectLevelSlider, {
+  range: {
+    min: 0,
+    max: 100,
+  },
+  start: 100,
+  step: 1,
+  connect: 'lower',
+});
 
 // создаем валидатор формы
 const pristine = new Pristine(uploadForm, {
@@ -82,9 +102,111 @@ pristine.addValidator(
   'Неверный комментарий'
 );
 
+// настройки для фото
+const photoSettings = {
+  scale: 100,
+  effect: 'none',
+  effectLevel: 100,
+};
+
+// применение новых параметров слайдера
+const updateEffectLevelSlider = (effect) => {
+  let min = 1;
+  let max = 100;
+  let step = 1;
+  switch (effect) {
+    case 'none':
+      break;
+    case 'chrome':
+    case 'sepia':
+      min = 0;
+      max = 1;
+      step = 0.1;
+      break;
+    case 'marvin':
+      min = 0;
+      max = 100;
+      step = 1;
+      break;
+    case 'phobos':
+      min = 0;
+      max = 3;
+      step = 0.1;
+      break;
+    case 'heat':
+      min = 1;
+      max = 3;
+      step = 0.1;
+      break;
+  }
+  effectLevelSlider.noUiSlider.updateOptions({
+    range: {
+      min,
+      max,
+    },
+    step
+  });
+  effectLevelSlider.noUiSlider.set(max);
+};
+
+// метод применения эффекта к фото
+const applyPhotoEffect = () => {
+  switch (photoSettings.effect) {
+    case 'none':
+      uploadPreview.style.filter = null;
+      break;
+    case 'chrome':
+      uploadPreview.style.filter = `grayscale(${photoSettings.effectLevel})`;
+      break;
+    case 'sepia':
+      uploadPreview.style.filter = `sepia(${photoSettings.effectLevel})`;
+      break;
+    case 'marvin':
+      uploadPreview.style.filter = `invert(${photoSettings.effectLevel}%)`;
+      break;
+    case 'phobos':
+      uploadPreview.style.filter = `blur(${photoSettings.effectLevel}px)`;
+      break;
+    case 'heat':
+      uploadPreview.style.filter = `brightness(${photoSettings.effectLevel})`;
+      break;
+  }
+};
+
+// метод для задания нового значения масштаб
+const updatePhotoScale = (value) => {
+  photoSettings.scale = value;
+  scaleValue.value = `${value}%`;
+  uploadPreview.style.transform = `scale(${value / 100})`;
+};
+
+// метод для задания нового значения эффект
+const updatePhotoEffect = (value) => {
+  photoSettings.effect = value;
+  if (value === 'none') {
+    effectLevel.classList.add('hidden');
+  } else {
+    effectLevel.classList.remove('hidden');
+  }
+};
+
+// метод для задания нового значения интенсивность эффекта
+const updatePhotoEffectLevel = (value) => {
+  effectLevelValue.value = value;
+  photoSettings.effectLevel = value;
+};
+
+// метод обнуления настроек для фото
+const resetPhotoSettings = () => {
+  updateEffectLevelSlider('none');
+  updatePhotoEffect('none');
+  applyPhotoEffect();
+  updatePhotoScale(100);
+};
 
 // открытие формы
 const showForm = (file) => {
+  resetPhotoSettings();
   // заменяем тестовую картинку
   uploadPreview.src = URL.createObjectURL(file);
   // показываем форму
@@ -124,6 +246,32 @@ const registerUploadFormEvents = () => {
       evt.preventDefault();
     }
   };
+
+  // события на масштабирование
+  scaleUp.addEventListener('click', () => {
+    if (photoSettings.scale < SCALE_MAX) {
+      updatePhotoScale(photoSettings.scale + SCALE_STEP);
+    }
+  });
+  scaleDown.addEventListener('click', () => {
+    if (photoSettings.scale > SCALE_MIN) {
+      updatePhotoScale(photoSettings.scale - SCALE_STEP);
+    }
+  });
+
+  // событие на смену эффекта
+  const effectsRadio = document.querySelectorAll('.effects__radio');
+  effectsRadio.forEach((radio) => radio.addEventListener('change', () => {
+    updateEffectLevelSlider(radio.value);
+    updatePhotoEffect(radio.value);
+    applyPhotoEffect();
+  }));
+
+  // при изменении слайдера
+  effectLevelSlider.noUiSlider.on('update', () => {
+    updatePhotoEffectLevel(effectLevelSlider.noUiSlider.get());
+    applyPhotoEffect();
+  });
 };
 
 export {registerUploadFormEvents};
