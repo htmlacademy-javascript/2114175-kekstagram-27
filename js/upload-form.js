@@ -11,6 +11,8 @@ const scaleValue = document.querySelector('.scale__control--value');
 const effectLevel = document.querySelector('.effect-level');
 const effectLevelValue = document.querySelector('.effect-level__value');
 const effectLevelSlider = document.querySelector('.effect-level__slider');
+const successTemplate = document.querySelector('#success').content;
+const errorTemplate = document.querySelector('#error').content;
 const HASHTAGS_MAX_LENGTH = 5;
 const HASHTAG_MIN_LENGTH = 2;
 const HASHTAG_MAX_LENGTH = 20;
@@ -224,6 +226,51 @@ const closeForm = () => {
   document.body.classList.remove('modal-open');
 };
 
+const onSuccessSend = () => {
+  // сообщение что все успешно
+  const success = successTemplate.cloneNode(true);
+  document.body.appendChild(success);
+
+  // закрытие сообщения
+  // todo закрытие по esc
+  const successClose = document.querySelector('.success__button');
+  successClose.addEventListener('click', () => {
+    closeForm();
+    document.body.removeChild(document.querySelector('.success'));
+  });
+};
+
+const onErrorSend = () => {
+  // сообщение об ошибке
+  const error = errorTemplate.cloneNode(true);
+  document.body.appendChild(error);
+
+  // закрытие сообщения
+  // todo закрытие по esc
+  const errorClose = document.querySelector('.error__button');
+  errorClose.addEventListener('click', () => {
+    document.body.removeChild(document.querySelector('.error'));
+  });
+};
+
+// отправка формы
+const sendForm = () => {
+  // todo data
+  const formData = new FormData();
+  fetch('https://27.javascript.pages.academy/kekstagram', {
+    method: 'POST',
+    body: formData,
+  })
+    .then((response) => {
+      if (response.ok) {
+        onSuccessSend();
+      } else {
+        onErrorSend();
+      }
+    })
+    .catch(onErrorSend);
+};
+
 // Регистрация событий
 const registerUploadFormEvents = () => {
   // событие на выбор картинки
@@ -242,8 +289,9 @@ const registerUploadFormEvents = () => {
   // событие на отправку
   uploadForm.onsubmit = (evt) => {
     const valid = pristine.validate();
-    if (!valid) {
-      evt.preventDefault();
+    evt.preventDefault();
+    if (valid) {
+      sendForm();
     }
   };
 
