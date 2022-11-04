@@ -24,6 +24,5 @@ const onPhotoLoaded = (photos) => {
 fetch('https://27.javascript.pages.academy/kekstagram/data')
   .then((response) => response.json())
   .then(onPhotoLoaded)
-  .catch((err) => console.log(err))
   .catch(() => showAlert('Не удалось загрузить фотографии'));
 
