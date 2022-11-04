@@ -1,4 +1,5 @@
 const uploadForm = document.querySelector('#upload-select-image');
+const uploadSubmit = document.querySelector('#upload-submit');
 const fileInput = document.querySelector('#upload-file');
 const hashtagsInput = document.querySelector('.text__hashtags');
 const commentInput = document.querySelector('.text__description');
@@ -43,9 +44,9 @@ const pristine = new Pristine(uploadForm, {
 }, false);
 
 // функция валидации поля хэштеги
-function validateHashtags (value) {
+function validateHashtags(value) {
   // Нет хэштегов
-  if(value === '') {
+  if (value === '') {
     return true;
   }
 
@@ -93,7 +94,7 @@ pristine.addValidator(
 );
 
 // функция валидации поля описание
-function validateComment (value) {
+function validateComment(value) {
   return value.length <= COMMENT_MAX_LENGTH;
 }
 
@@ -226,37 +227,49 @@ const closeForm = () => {
   document.body.classList.remove('modal-open');
 };
 
+// закрытие окна об успешной отправке
+const closeSuccess = () => {
+  document.body.removeChild(document.querySelector('.success'));
+  closeForm();
+};
+
+// закрытие окна об ошибке
+const closeError = () => document.body.removeChild(document.querySelector('.error'));
+
+// событие после успешной отправки
 const onSuccessSend = () => {
   // сообщение что все успешно
   const success = successTemplate.cloneNode(true);
   document.body.appendChild(success);
 
   // закрытие сообщения
-  // todo закрытие по esc
-  const successClose = document.querySelector('.success__button');
-  successClose.addEventListener('click', () => {
-    closeForm();
-    document.body.removeChild(document.querySelector('.success'));
+  document.querySelector('.success').addEventListener('click', (evt) => {
+    if (evt.target === evt.currentTarget) {
+      closeSuccess();
+    }
   });
+  document.querySelector('.success__button').addEventListener('click', closeSuccess);
 };
 
+// событие после ошибки отправки
 const onErrorSend = () => {
   // сообщение об ошибке
   const error = errorTemplate.cloneNode(true);
   document.body.appendChild(error);
 
   // закрытие сообщения
-  // todo закрытие по esc
-  const errorClose = document.querySelector('.error__button');
-  errorClose.addEventListener('click', () => {
-    document.body.removeChild(document.querySelector('.error'));
+  document.querySelector('.error').addEventListener('click', (evt) => {
+    if (evt.target === evt.currentTarget) {
+      closeError();
+    }
   });
+  document.querySelector('.error__button').addEventListener('click', closeError);
 };
 
 // отправка формы
 const sendForm = () => {
-  // todo data
-  const formData = new FormData();
+  uploadSubmit.setAttribute('disabled', 'true');
+  const formData = new FormData(uploadForm);
   fetch('https://27.javascript.pages.academy/kekstagram', {
     method: 'POST',
     body: formData,
@@ -268,7 +281,10 @@ const sendForm = () => {
         onErrorSend();
       }
     })
-    .catch(onErrorSend);
+    .catch(onErrorSend)
+    .finally(() => {
+      uploadSubmit.removeAttribute('disabled');
+    });
 };
 
 // Регистрация событий
@@ -280,8 +296,14 @@ const registerUploadFormEvents = () => {
 
   // событие на закрытие формы
   document.body.addEventListener('keydown', (evt) => {
-    if (evt.key === 'Escape' && document.activeElement !== hashtagsInput && document.activeElement !== commentInput) {
-      cancel.click();
+    if (evt.key === 'Escape') {
+      if (document.querySelector('.success')) {
+        closeSuccess();
+      } else if (document.querySelector('.error')) {
+        closeError();
+      } else if (document.activeElement !== hashtagsInput && document.activeElement !== commentInput) {
+        cancel.click();
+      }
     }
   });
   cancel.addEventListener('click', closeForm);
