@@ -21,6 +21,14 @@ const COMMENT_MAX_LENGTH = 140;
 const SCALE_STEP = 25;
 const SCALE_MIN = 25;
 const SCALE_MAX = 100;
+const EFFECTS = {
+  NONE: 'none',
+  CHROME: 'chrome',
+  SEPIA: 'sepia',
+  MARVIN: 'marvin',
+  PHOBOS: 'phobos',
+  HEAT: 'heat',
+};
 
 // создаем слайдер
 noUiSlider.create(effectLevelSlider, {
@@ -107,8 +115,8 @@ pristine.addValidator(
 
 // настройки для фото
 const photoSettings = {
-  scale: 100,
-  effect: 'none',
+  scale: SCALE_MAX,
+  effect: EFFECTS.NONE,
   effectLevel: 100,
 };
 
@@ -118,25 +126,25 @@ const updateEffectLevelSlider = (effect) => {
   let max = 100;
   let step = 1;
   switch (effect) {
-    case 'none':
+    case EFFECTS.NONE:
       break;
-    case 'chrome':
-    case 'sepia':
+    case EFFECTS.CHROME:
+    case EFFECTS.SEPIA:
       min = 0;
       max = 1;
       step = 0.1;
       break;
-    case 'marvin':
+    case EFFECTS.MARVIN:
       min = 0;
       max = 100;
       step = 1;
       break;
-    case 'phobos':
+    case EFFECTS.PHOBOS:
       min = 0;
       max = 3;
       step = 0.1;
       break;
-    case 'heat':
+    case EFFECTS.HEAT:
       min = 1;
       max = 3;
       step = 0.1;
@@ -155,22 +163,22 @@ const updateEffectLevelSlider = (effect) => {
 // метод применения эффекта к фото
 const applyPhotoEffect = () => {
   switch (photoSettings.effect) {
-    case 'none':
+    case EFFECTS.NONE:
       uploadPreview.style.filter = null;
       break;
-    case 'chrome':
+    case EFFECTS.CHROME:
       uploadPreview.style.filter = `grayscale(${photoSettings.effectLevel})`;
       break;
-    case 'sepia':
+    case EFFECTS.SEPIA:
       uploadPreview.style.filter = `sepia(${photoSettings.effectLevel})`;
       break;
-    case 'marvin':
+    case EFFECTS.MARVIN:
       uploadPreview.style.filter = `invert(${photoSettings.effectLevel}%)`;
       break;
-    case 'phobos':
+    case EFFECTS.PHOBOS:
       uploadPreview.style.filter = `blur(${photoSettings.effectLevel}px)`;
       break;
-    case 'heat':
+    case EFFECTS.HEAT:
       uploadPreview.style.filter = `brightness(${photoSettings.effectLevel})`;
       break;
   }
@@ -186,7 +194,7 @@ const updatePhotoScale = (value) => {
 // метод для задания нового значения эффект
 const updatePhotoEffect = (value) => {
   photoSettings.effect = value;
-  if (value === 'none') {
+  if (value === EFFECTS.NONE) {
     effectLevel.classList.add('hidden');
   } else {
     effectLevel.classList.remove('hidden');
@@ -201,10 +209,10 @@ const updatePhotoEffectLevel = (value) => {
 
 // метод обнуления настроек для фото
 const resetPhotoSettings = () => {
-  updateEffectLevelSlider('none');
-  updatePhotoEffect('none');
+  updateEffectLevelSlider(EFFECTS.NONE);
+  updatePhotoEffect(EFFECTS.NONE);
   applyPhotoEffect();
-  updatePhotoScale(100);
+  updatePhotoScale(SCALE_MAX);
 };
 
 // открытие формы
