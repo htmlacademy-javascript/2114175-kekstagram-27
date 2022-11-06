@@ -1,6 +1,7 @@
 import {renderListing} from './listing.js';
 import {showAlert} from './util.js';
 import {showModal} from './details.js';
+import {loadPhotos} from './api.js';
 import {registerUploadFormEvents} from './upload-form.js';
 
 const onPhotoLoaded = (photos) => {
@@ -21,7 +22,7 @@ const onPhotoLoaded = (photos) => {
 };
 
 // Загрузка фотографий
-fetch('https://27.javascript.pages.academy/kekstagram/data')
+loadPhotos()
   .then((response) => response.json())
   .then(onPhotoLoaded)
   .catch(() => showAlert('Не удалось загрузить фотографии'));
