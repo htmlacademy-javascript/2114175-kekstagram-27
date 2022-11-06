@@ -1,4 +1,7 @@
+import {uploadPhoto} from './api.js';
+
 const uploadForm = document.querySelector('#upload-select-image');
+const uploadSubmit = document.querySelector('#upload-submit');
 const fileInput = document.querySelector('#upload-file');
 const hashtagsInput = document.querySelector('.text__hashtags');
 const commentInput = document.querySelector('.text__description');
@@ -11,6 +14,8 @@ const scaleValue = document.querySelector('.scale__control--value');
 const effectLevel = document.querySelector('.effect-level');
 const effectLevelValue = document.querySelector('.effect-level__value');
 const effectLevelSlider = document.querySelector('.effect-level__slider');
+const successTemplate = document.querySelector('#success').content;
+const errorTemplate = document.querySelector('#error').content;
 const HASHTAGS_MAX_LENGTH = 5;
 const HASHTAG_MIN_LENGTH = 2;
 const HASHTAG_MAX_LENGTH = 20;
@@ -18,6 +23,14 @@ const COMMENT_MAX_LENGTH = 140;
 const SCALE_STEP = 25;
 const SCALE_MIN = 25;
 const SCALE_MAX = 100;
+const EFFECTS = {
+  NONE: 'none',
+  CHROME: 'chrome',
+  SEPIA: 'sepia',
+  MARVIN: 'marvin',
+  PHOBOS: 'phobos',
+  HEAT: 'heat',
+};
 
 // создаем слайдер
 noUiSlider.create(effectLevelSlider, {
@@ -41,9 +54,9 @@ const pristine = new Pristine(uploadForm, {
 }, false);
 
 // функция валидации поля хэштеги
-function validateHashtags (value) {
+function validateHashtags(value) {
   // Нет хэштегов
-  if(value === '') {
+  if (value === '') {
     return true;
   }
 
@@ -91,7 +104,7 @@ pristine.addValidator(
 );
 
 // функция валидации поля описание
-function validateComment (value) {
+function validateComment(value) {
   return value.length <= COMMENT_MAX_LENGTH;
 }
 
@@ -104,8 +117,8 @@ pristine.addValidator(
 
 // настройки для фото
 const photoSettings = {
-  scale: 100,
-  effect: 'none',
+  scale: SCALE_MAX,
+  effect: EFFECTS.NONE,
   effectLevel: 100,
 };
 
@@ -115,25 +128,25 @@ const updateEffectLevelSlider = (effect) => {
   let max = 100;
   let step = 1;
   switch (effect) {
-    case 'none':
+    case EFFECTS.NONE:
       break;
-    case 'chrome':
-    case 'sepia':
+    case EFFECTS.CHROME:
+    case EFFECTS.SEPIA:
       min = 0;
       max = 1;
       step = 0.1;
       break;
-    case 'marvin':
+    case EFFECTS.MARVIN:
       min = 0;
       max = 100;
       step = 1;
       break;
-    case 'phobos':
+    case EFFECTS.PHOBOS:
       min = 0;
       max = 3;
       step = 0.1;
       break;
-    case 'heat':
+    case EFFECTS.HEAT:
       min = 1;
       max = 3;
       step = 0.1;
@@ -152,22 +165,22 @@ const updateEffectLevelSlider = (effect) => {
 // метод применения эффекта к фото
 const applyPhotoEffect = () => {
   switch (photoSettings.effect) {
-    case 'none':
+    case EFFECTS.NONE:
       uploadPreview.style.filter = null;
       break;
-    case 'chrome':
+    case EFFECTS.CHROME:
       uploadPreview.style.filter = `grayscale(${photoSettings.effectLevel})`;
       break;
-    case 'sepia':
+    case EFFECTS.SEPIA:
       uploadPreview.style.filter = `sepia(${photoSettings.effectLevel})`;
       break;
-    case 'marvin':
+    case EFFECTS.MARVIN:
       uploadPreview.style.filter = `invert(${photoSettings.effectLevel}%)`;
       break;
-    case 'phobos':
+    case EFFECTS.PHOBOS:
       uploadPreview.style.filter = `blur(${photoSettings.effectLevel}px)`;
       break;
-    case 'heat':
+    case EFFECTS.HEAT:
       uploadPreview.style.filter = `brightness(${photoSettings.effectLevel})`;
       break;
   }
@@ -183,7 +196,7 @@ const updatePhotoScale = (value) => {
 // метод для задания нового значения эффект
 const updatePhotoEffect = (value) => {
   photoSettings.effect = value;
-  if (value === 'none') {
+  if (value === EFFECTS.NONE) {
     effectLevel.classList.add('hidden');
   } else {
     effectLevel.classList.remove('hidden');
@@ -198,10 +211,10 @@ const updatePhotoEffectLevel = (value) => {
 
 // метод обнуления настроек для фото
 const resetPhotoSettings = () => {
-  updateEffectLevelSlider('none');
-  updatePhotoEffect('none');
+  updateEffectLevelSlider(EFFECTS.NONE);
+  updatePhotoEffect(EFFECTS.NONE);
   applyPhotoEffect();
-  updatePhotoScale(100);
+  updatePhotoScale(SCALE_MAX);
 };
 
 // открытие формы
@@ -224,6 +237,77 @@ const closeForm = () => {
   document.body.classList.remove('modal-open');
 };
 
+// закрытие окна об успешной отправке
+const closeSuccess = () => {
+  document.body.removeChild(document.querySelector('.success'));
+  document.body.removeEventListener('keydown', closeSuccessEscEvtListener);
+  cancel.click();
+};
+
+// закрытие окна об ошибке
+const closeError = () => {
+  document.body.removeChild(document.querySelector('.error'));
+  document.body.removeEventListener('keydown', closeErrorEscEvtListener);
+};
+
+// событие после успешной отправки
+const onSuccessSend = () => {
+  // сообщение что все успешно
+  const success = successTemplate.cloneNode(true);
+  document.body.appendChild(success);
+
+  // событие на закрытие сообщения по esc
+  document.body.addEventListener('keydown', closeSuccessEscEvtListener);
+
+  // закрытие сообщения
+  document.querySelector('.success').addEventListener('click', (evt) => {
+    if (evt.target === evt.currentTarget) {
+      closeSuccess();
+    }
+  });
+  document.querySelector('.success__button').addEventListener('click', closeSuccess);
+};
+
+// событие после ошибки отправки
+const onErrorSend = () => {
+  // сообщение об ошибке
+  const error = errorTemplate.cloneNode(true);
+  document.body.appendChild(error);
+
+  // событие на закрытие сообщения по esc
+  document.body.addEventListener('keydown', closeErrorEscEvtListener);
+
+  // закрытие сообщения
+  document.querySelector('.error').addEventListener('click', (evt) => {
+    if (evt.target === evt.currentTarget) {
+      closeError();
+    }
+  });
+  document.querySelector('.error__button').addEventListener('click', closeError);
+};
+
+// отправка формы
+const sendForm = () => {
+  uploadSubmit.setAttribute('disabled', 'true');
+  const formData = new FormData(uploadForm);
+  uploadPhoto(formData, onSuccessSend, onErrorSend)
+    .finally(() => {
+      uploadSubmit.removeAttribute('disabled');
+    });
+};
+
+function closeSuccessEscEvtListener (evt) {
+  if (evt.key === 'Escape' && document.querySelector('.success')) {
+    closeSuccess();
+  }
+}
+
+function closeErrorEscEvtListener (evt) {
+  if (evt.key === 'Escape' && document.querySelector('.error')) {
+    closeError();
+  }
+}
+
 // Регистрация событий
 const registerUploadFormEvents = () => {
   // событие на выбор картинки
@@ -233,19 +317,25 @@ const registerUploadFormEvents = () => {
 
   // событие на закрытие формы
   document.body.addEventListener('keydown', (evt) => {
-    if (evt.key === 'Escape' && document.activeElement !== hashtagsInput && document.activeElement !== commentInput) {
-      cancel.click();
+    if (evt.key === 'Escape') {
+      if (document.querySelector('.success') || document.querySelector('.error')) {
+        return;
+      }
+      if (document.activeElement !== hashtagsInput && document.activeElement !== commentInput) {
+        cancel.click();
+      }
     }
   });
   cancel.addEventListener('click', closeForm);
 
   // событие на отправку
-  uploadForm.onsubmit = (evt) => {
+  uploadForm.addEventListener('submit', (evt) => {
     const valid = pristine.validate();
-    if (!valid) {
-      evt.preventDefault();
+    evt.preventDefault();
+    if (valid) {
+      sendForm();
     }
-  };
+  });
 
   // события на масштабирование
   scaleUp.addEventListener('click', () => {

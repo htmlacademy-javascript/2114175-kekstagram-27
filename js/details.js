@@ -65,9 +65,9 @@ const showModal = function (photo) {
   showMoreComments(photo);
 
   // добавляем событие за загрузку новых комментариев
-  bigPictureComLoader.onclick = () => {
+  bigPictureComLoader.addEventListener('click', () => {
     showMoreComments(photo);
-  };
+  });
 };
 
 const closeModal = function () {
