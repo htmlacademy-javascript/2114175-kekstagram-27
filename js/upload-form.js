@@ -1,3 +1,5 @@
+import {uploadPhoto} from './api.js';
+
 const uploadForm = document.querySelector('#upload-select-image');
 const uploadSubmit = document.querySelector('#upload-submit');
 const fileInput = document.querySelector('#upload-file');
@@ -238,17 +240,24 @@ const closeForm = () => {
 // закрытие окна об успешной отправке
 const closeSuccess = () => {
   document.body.removeChild(document.querySelector('.success'));
-  closeForm();
+  document.body.removeEventListener('keydown', closeSuccessEscEvtListener);
+  cancel.click();
 };
 
 // закрытие окна об ошибке
-const closeError = () => document.body.removeChild(document.querySelector('.error'));
+const closeError = () => {
+  document.body.removeChild(document.querySelector('.error'));
+  document.body.removeEventListener('keydown', closeErrorEscEvtListener);
+};
 
 // событие после успешной отправки
 const onSuccessSend = () => {
   // сообщение что все успешно
   const success = successTemplate.cloneNode(true);
   document.body.appendChild(success);
+
+  // событие на закрытие сообщения по esc
+  document.body.addEventListener('keydown', closeSuccessEscEvtListener);
 
   // закрытие сообщения
   document.querySelector('.success').addEventListener('click', (evt) => {
@@ -265,6 +274,9 @@ const onErrorSend = () => {
   const error = errorTemplate.cloneNode(true);
   document.body.appendChild(error);
 
+  // событие на закрытие сообщения по esc
+  document.body.addEventListener('keydown', closeErrorEscEvtListener);
+
   // закрытие сообщения
   document.querySelector('.error').addEventListener('click', (evt) => {
     if (evt.target === evt.currentTarget) {
@@ -278,22 +290,23 @@ const onErrorSend = () => {
 const sendForm = () => {
   uploadSubmit.setAttribute('disabled', 'true');
   const formData = new FormData(uploadForm);
-  fetch('https://27.javascript.pages.academy/kekstagram', {
-    method: 'POST',
-    body: formData,
-  })
-    .then((response) => {
-      if (response.ok) {
-        onSuccessSend();
-      } else {
-        onErrorSend();
-      }
-    })
-    .catch(onErrorSend)
+  uploadPhoto(formData, onSuccessSend, onErrorSend)
     .finally(() => {
       uploadSubmit.removeAttribute('disabled');
     });
 };
+
+function closeSuccessEscEvtListener (evt) {
+  if (evt.key === 'Escape' && document.querySelector('.success')) {
+    closeSuccess();
+  }
+}
+
+function closeErrorEscEvtListener (evt) {
+  if (evt.key === 'Escape' && document.querySelector('.error')) {
+    closeError();
+  }
+}
 
 // Регистрация событий
 const registerUploadFormEvents = () => {
@@ -305,11 +318,10 @@ const registerUploadFormEvents = () => {
   // событие на закрытие формы
   document.body.addEventListener('keydown', (evt) => {
     if (evt.key === 'Escape') {
-      if (document.querySelector('.success')) {
-        closeSuccess();
-      } else if (document.querySelector('.error')) {
-        closeError();
-      } else if (document.activeElement !== hashtagsInput && document.activeElement !== commentInput) {
+      if (document.querySelector('.success') || document.querySelector('.error')) {
+        return;
+      }
+      if (document.activeElement !== hashtagsInput && document.activeElement !== commentInput) {
         cancel.click();
       }
     }
@@ -317,13 +329,13 @@ const registerUploadFormEvents = () => {
   cancel.addEventListener('click', closeForm);
 
   // событие на отправку
-  uploadForm.onsubmit = (evt) => {
+  uploadForm.addEventListener('submit', (evt) => {
     const valid = pristine.validate();
     evt.preventDefault();
     if (valid) {
       sendForm();
     }
-  };
+  });
 
   // события на масштабирование
   scaleUp.addEventListener('click', () => {
