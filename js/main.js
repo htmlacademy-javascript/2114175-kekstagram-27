@@ -21,9 +21,8 @@ const onPhotoLoaded = (photos) => {
   registerUploadFormEvents();
 };
 
+const onPhotoLoadError = () => showAlert('Не удалось загрузить фотографии');
+
 // Загрузка фотографий
-loadPhotos()
-  .then((response) => response.json())
-  .then(onPhotoLoaded)
-  .catch(() => showAlert('Не удалось загрузить фотографии'));
+loadPhotos(onPhotoLoaded, onPhotoLoadError);
 

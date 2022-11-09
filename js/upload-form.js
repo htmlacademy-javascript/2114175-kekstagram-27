@@ -217,6 +217,19 @@ const resetPhotoSettings = () => {
   updatePhotoScale(SCALE_MAX);
 };
 
+// закрытие формы
+const closeForm = () => {
+  // сбрасываем ошибки
+  pristine.reset();
+  // скрываем форму
+  uploadOverlay.classList.add('hidden');
+  document.body.classList.remove('modal-open');
+  // отмена события "закрытие формы по esc"
+  document.body.removeEventListener('keydown', closeUploadEscEvtListener);
+  // отмена события "закрытие формы по кнопке"
+  cancel.removeEventListener('keydown', closeForm);
+};
+
 // открытие формы
 const showForm = (file) => {
   resetPhotoSettings();
@@ -225,16 +238,10 @@ const showForm = (file) => {
   // показываем форму
   uploadOverlay.classList.remove('hidden');
   document.body.classList.add('modal-open');
-};
-
-// закрытие формы
-const closeForm = () => {
-  // сбрасываем ошибки
-  pristine.reset();
-
-  // скрываем форму
-  uploadOverlay.classList.add('hidden');
-  document.body.classList.remove('modal-open');
+  // закрытие формы по esc
+  document.body.addEventListener('keydown', closeUploadEscEvtListener);
+  // закрытие формы по кнопке
+  cancel.addEventListener('click', closeForm);
 };
 
 // закрытие окна об успешной отправке
@@ -296,37 +303,12 @@ const sendForm = () => {
     });
 };
 
-function closeSuccessEscEvtListener (evt) {
-  if (evt.key === 'Escape' && document.querySelector('.success')) {
-    closeSuccess();
-  }
-}
-
-function closeErrorEscEvtListener (evt) {
-  if (evt.key === 'Escape' && document.querySelector('.error')) {
-    closeError();
-  }
-}
-
 // Регистрация событий
 const registerUploadFormEvents = () => {
   // событие на выбор картинки
   fileInput.onchange = function () {
     showForm(fileInput.files[0]);
   };
-
-  // событие на закрытие формы
-  document.body.addEventListener('keydown', (evt) => {
-    if (evt.key === 'Escape') {
-      if (document.querySelector('.success') || document.querySelector('.error')) {
-        return;
-      }
-      if (document.activeElement !== hashtagsInput && document.activeElement !== commentInput) {
-        cancel.click();
-      }
-    }
-  });
-  cancel.addEventListener('click', closeForm);
 
   // событие на отправку
   uploadForm.addEventListener('submit', (evt) => {
@@ -363,5 +345,28 @@ const registerUploadFormEvents = () => {
     applyPhotoEffect();
   });
 };
+
+function closeSuccessEscEvtListener (evt) {
+  if (evt.key === 'Escape' && document.querySelector('.success')) {
+    closeSuccess();
+  }
+}
+
+function closeErrorEscEvtListener (evt) {
+  if (evt.key === 'Escape' && document.querySelector('.error')) {
+    closeError();
+  }
+}
+
+function closeUploadEscEvtListener (evt) {
+  if (evt.key === 'Escape') {
+    if (document.querySelector('.success') || document.querySelector('.error')) {
+      return;
+    }
+    if (document.activeElement !== hashtagsInput && document.activeElement !== commentInput) {
+      cancel.click();
+    }
+  }
+}
 
 export {registerUploadFormEvents};
