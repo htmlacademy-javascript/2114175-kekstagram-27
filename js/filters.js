@@ -1,7 +1,13 @@
 import {debounce, getRandomArrayElement} from './util.js';
 import {renderListing} from './listing.js';
 
-const rerenderDelay = 300;
+const RERENDER_DELAY = 300;
+const RANDOM_PHOTO_NUM = 10;
+const FILTERS = {
+  DEFAULT: 'filter-default',
+  RANDOM: 'filter-random',
+  DISCUSSED: 'filter-discussed',
+};
 
 const imgFilters = document.querySelector('.img-filters');
 
@@ -25,7 +31,7 @@ const registerFilters = (onFilterChange) => {
   };
 
   // перерисовка фото по клику на фильтр
-  const filterButtonRerender = debounce(() => onFilterChange(), rerenderDelay);
+  const filterButtonRerender = debounce(() => onFilterChange(), RERENDER_DELAY);
 
   for (let i = 0; i <= imgFilterButtons.length - 1; i++) {
     imgFilterButtons[i].addEventListener('click', filterButtonChangeClass);
@@ -37,18 +43,18 @@ const filterPhotos = (photos) => {
   const filterId = getActiveFilterId();
   let renderPhotos = [];
   switch (filterId) {
-    case 'filter-default':
+    case FILTERS.DEFAULT:
       renderPhotos = photos;
       break;
-    case 'filter-random':
+    case FILTERS.RANDOM:
       do {
         const randomPhoto = getRandomArrayElement(photos);
         if (!renderPhotos.includes(randomPhoto)) {
           renderPhotos.push(randomPhoto);
         }
-      } while (renderPhotos.length < 10);
+      } while (renderPhotos.length < RANDOM_PHOTO_NUM);
       break;
-    case 'filter-discussed':
+    case FILTERS.DISCUSSED:
       renderPhotos = [...photos].sort((a, b) => a.comments.length < b.comments.length);
       break;
   }

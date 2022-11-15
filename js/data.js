@@ -9,16 +9,16 @@ let commentId = 0;
 const getCommentId = () => ++commentId;
 
 // Генерируем случайные пути к фото
-const maxPhotoNum = 25;
+const MAX_PHOTO_NUM = 25;
 const generatePhotoPath = (id) => `photos/${id}.jpg`;
 
 // Массивы данных
-const photoDescriptions = [
+const PHOTO_DESCRIPTIONS = [
   'Всё отлично!',
   'Чувствую себя прекрасно!',
   'Все как всегда',
 ];
-const messages = [
+const MESSAGES = [
   'Всё отлично!',
   'В целом всё неплохо. Но не всё.',
   'Когда вы делаете фотографию, хорошо бы убирать палец из кадра. В конце концов это просто непрофессионально.',
@@ -26,7 +26,7 @@ const messages = [
   'Я поскользнулся на банановой кожуре и уронил фотоаппарат на кота и у меня получилась фотография лучше.',
   'Лица у людей на фотке перекошены, как будто их избивают. Как можно было поймать такой неудачный момент?!'
 ];
-const names = [
+const NAMES = [
   'Артём',
   'Вероника',
   'Андрей',
@@ -37,24 +37,24 @@ const names = [
 
 // Генерируем аватары
 
-const minAvatarNum = 1;
-const maxAvatarNum = 6;
+const MIN_AVATAR_NUM = 1;
+const MAX_AVATAR_NUM = 6;
 
-const generateAvatarPath = () => `img/avatar-${getRandomPositiveInteger(minAvatarNum, maxAvatarNum)}.svg`;
+const generateAvatarPath = () => `img/avatar-${getRandomPositiveInteger(MIN_AVATAR_NUM, MAX_AVATAR_NUM)}.svg`;
 
 // Генерируем комментарий
 const createComment = () => ({
   id: getCommentId(),
   avatar: generateAvatarPath(),
-  message: getRandomArrayElement(messages),
-  name: getRandomArrayElement(names),
+  message: getRandomArrayElement(MESSAGES),
+  name: getRandomArrayElement(NAMES),
 });
 
 // Генерируем лайки
-const minLikesNum = 15;
-const maxLikesNum = 200;
+const MIN_LIKES_NUM = 15;
+const MAX_LIKES_NUM = 200;
 
-const generateLikesNum = () => getRandomPositiveInteger(minLikesNum, maxLikesNum);
+const generateLikesNum = () => getRandomPositiveInteger(MIN_LIKES_NUM, MAX_LIKES_NUM);
 
 // Генерируем фото
 const createPhoto = () => {
@@ -62,13 +62,13 @@ const createPhoto = () => {
   return {
     id: id,
     url: generatePhotoPath(id),
-    description: getRandomArrayElement(photoDescriptions),
+    description: getRandomArrayElement(PHOTO_DESCRIPTIONS),
     likes: generateLikesNum(),
     //  функция создающая массив, длиной от 1 до 20, и заполняет массив сгенерированными коментами
     comments: Array.from({length: getRandomPositiveInteger(1, 20)}, createComment),
   };
 };
 
-const createPhotos = () => Array.from({length: maxPhotoNum}, createPhoto);
+const createPhotos = () => Array.from({length: MAX_PHOTO_NUM}, createPhoto);
 
 export {createPhotos};
