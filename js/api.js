@@ -1,4 +1,9 @@
-const loadPhotos = () => fetch('https://27.javascript.pages.academy/kekstagram/data');
+const loadPhotos = (onSuccess, onError) =>
+  fetch('https://27.javascript.pages.academy/kekstagram/data')
+    .then((response) => response.json())
+    .then(onSuccess)
+    .catch(onError);
+
 const uploadPhoto = (formData, onSuccess, onError) =>
   fetch('https://27.javascript.pages.academy/kekstagram', {
     method: 'POST',

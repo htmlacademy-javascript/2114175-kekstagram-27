@@ -1,4 +1,16 @@
+import {showModal} from './details.js';
+
+const clearListing = () => {
+  const pics = document.querySelectorAll('.picture');
+  for (let i = 0; i <= pics.length - 1; i++) {
+    pics[i].remove();
+  }
+};
+
 const renderListing = function (photos) {
+  // удаляем фото
+  clearListing();
+
   const listing = document.querySelector('.pictures');
   const pictureTemplate = document.querySelector('#picture').content;
   const fragment = document.createDocumentFragment();
@@ -16,6 +28,17 @@ const renderListing = function (photos) {
   }
 
   listing.appendChild(fragment);
+
+  const thumbnails = document.querySelectorAll('.picture');
+  const addThumbnailClickHandler = function (thumbnail, photo) {
+    thumbnail.addEventListener('click', (evt) => {
+      evt.preventDefault();
+      showModal(photo);
+    });
+  };
+  for (let i = 0; i <= thumbnails.length - 1; i++) {
+    addThumbnailClickHandler(thumbnails[i], photos[i]);
+  }
 };
 
 export {renderListing};
