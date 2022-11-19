@@ -11,15 +11,15 @@ const bigPictureClose = bigPicture.querySelector('.cancel');
 const fragmentComment = document.createDocumentFragment();
 const COMMENTS_PER_PAGE = 5;
 let showCommentsCounter = 0;
+let comments = [];
 
-const showMoreComments = (photo) => {
+const showMoreComments = () => {
   // берем часть комментариев
-  const comments = photo.comments.slice(showCommentsCounter, showCommentsCounter + COMMENTS_PER_PAGE);
-  showCommentsCounter += comments.length;
+  const showComments = comments.slice(showCommentsCounter, showCommentsCounter + COMMENTS_PER_PAGE);
+  showCommentsCounter += showComments.length;
 
   // выводим комментарии
-  for (let i = 0; i <= comments.length - 1; i++) {
-    const photoComment = comments[i];
+  showComments.forEach((photoComment) => {
     const comment = document.createElement('li');
     const commentImg = document.createElement('img');
     const commentText = document.createElement('p');
@@ -31,25 +31,35 @@ const showMoreComments = (photo) => {
     commentImg.src = photoComment.avatar;
     commentText.textContent = photoComment.message;
     fragmentComment.appendChild(comment);
-  }
+  });
   bigPictureComments.appendChild(fragmentComment);
 
 
-  if (photo.comments.length <= COMMENTS_PER_PAGE) {
+  if (comments.length <= COMMENTS_PER_PAGE) {
     // если комментов не больше 5, скрываем счетчик
     bigPictureComCount.classList.add('hidden');
   } else {
     // обновляем отображаемый счетчик комментариев
-    bigPictureComCount.innerHTML = `${showCommentsCounter} из <span class="comments-count">${photo.comments.length}</span> комментариев`;
+    bigPictureComCount.innerHTML = `${showCommentsCounter} из <span class="comments-count">${comments.length}</span> комментариев`;
   }
 
   // скрываем "загрузить новые комментарии" если конец списка
-  if (showCommentsCounter === photo.comments.length ) {
+  if (showCommentsCounter === comments.length ) {
     bigPictureComLoader.classList.add('hidden');
   }
 };
 
-const showModal = function (photo) {
+const closeModal = () => {
+  bigPicture.classList.add('hidden');
+  body.classList.remove('modal-open');
+  bigPictureComLoader.classList.remove('hidden');
+  bigPictureComCount.classList.remove('hidden');
+  document.body.removeEventListener('keydown', escClickHandler);
+  bigPictureClose.removeEventListener('click', closeModal);
+  bigPictureComLoader.removeEventListener('click', showMoreComments);
+};
+
+const showModal = (photo) => {
   bigPicture.classList.remove('hidden');
   body.classList.add('modal-open');
   bigPictureImg.src = photo.url;
@@ -62,26 +72,19 @@ const showModal = function (photo) {
   // обнуляем счетчик показанных комментариев
   showCommentsCounter = 0;
   // показываем первые 5 комментариев
-  showMoreComments(photo);
+  comments = photo.comments;
+  showMoreComments();
 
   // добавляем событие за загрузку новых комментариев
-  bigPictureComLoader.addEventListener('click', () => {
-    showMoreComments(photo);
-  });
-};
+  bigPictureComLoader.addEventListener('click', showMoreComments);
 
-const closeModal = function () {
-  bigPicture.classList.add('hidden');
-  body.classList.remove('modal-open');
-  bigPictureComLoader.classList.remove('hidden');
-  bigPictureComCount.classList.remove('hidden');
+  document.body.addEventListener('keydown', escClickHandler);
+  bigPictureClose.addEventListener('click', closeModal);
 };
-
-document.body.addEventListener('keydown', (evt) => {
+function escClickHandler (evt) {
   if (evt.key === 'Escape') {
     closeModal();
   }
-});
-bigPictureClose.addEventListener('click', closeModal);
+}
 
 export {showModal};

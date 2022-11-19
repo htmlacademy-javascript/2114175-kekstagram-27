@@ -88,11 +88,7 @@ function validateHashtags(value) {
       return false;
     }
     // только буквы и цифры
-    if (/^[0-9a-zA-Zа-яА-ЯёЁ]*$/g.test(hashtag.substring(1)) === false) {
-      return false;
-    }
-
-    return true;
+    return /^[0-9a-zA-Zа-яА-ЯёЁ]*$/g.test(hashtag.substring(1)) !== false;
   });
 }
 
@@ -225,7 +221,7 @@ const closeForm = () => {
   uploadOverlay.classList.add('hidden');
   document.body.classList.remove('modal-open');
   // отмена события "закрытие формы по esc"
-  document.body.removeEventListener('keydown', closeUploadEscEvtListener);
+  document.body.removeEventListener('keydown', closeUploadEscClickHandler);
   // отмена события "закрытие формы по кнопке"
   cancel.removeEventListener('keydown', closeForm);
 };
@@ -239,7 +235,7 @@ const showForm = (file) => {
   uploadOverlay.classList.remove('hidden');
   document.body.classList.add('modal-open');
   // закрытие формы по esc
-  document.body.addEventListener('keydown', closeUploadEscEvtListener);
+  document.body.addEventListener('keydown', closeUploadEscClickHandler);
   // закрытие формы по кнопке
   cancel.addEventListener('click', closeForm);
 };
@@ -247,14 +243,14 @@ const showForm = (file) => {
 // закрытие окна об успешной отправке
 const closeSuccess = () => {
   document.body.removeChild(document.querySelector('.success'));
-  document.body.removeEventListener('keydown', closeSuccessEscEvtListener);
+  document.body.removeEventListener('keydown', closeSuccessEscClickHandler);
   cancel.click();
 };
 
 // закрытие окна об ошибке
 const closeError = () => {
   document.body.removeChild(document.querySelector('.error'));
-  document.body.removeEventListener('keydown', closeErrorEscEvtListener);
+  document.body.removeEventListener('keydown', closeErrorEscClickHandler);
 };
 
 // событие после успешной отправки
@@ -264,7 +260,7 @@ const onSuccessSend = () => {
   document.body.appendChild(success);
 
   // событие на закрытие сообщения по esc
-  document.body.addEventListener('keydown', closeSuccessEscEvtListener);
+  document.body.addEventListener('keydown', closeSuccessEscClickHandler);
 
   // закрытие сообщения
   document.querySelector('.success').addEventListener('click', (evt) => {
@@ -282,7 +278,7 @@ const onErrorSend = () => {
   document.body.appendChild(error);
 
   // событие на закрытие сообщения по esc
-  document.body.addEventListener('keydown', closeErrorEscEvtListener);
+  document.body.addEventListener('keydown', closeErrorEscClickHandler);
 
   // закрытие сообщения
   document.querySelector('.error').addEventListener('click', (evt) => {
@@ -306,7 +302,7 @@ const sendForm = () => {
 // Регистрация событий
 const registerUploadFormEvents = () => {
   // событие на выбор картинки
-  fileInput.onchange = function () {
+  fileInput.onchange = () => {
     showForm(fileInput.files[0]);
   };
 
@@ -346,19 +342,19 @@ const registerUploadFormEvents = () => {
   });
 };
 
-function closeSuccessEscEvtListener (evt) {
+function closeSuccessEscClickHandler (evt) {
   if (evt.key === 'Escape' && document.querySelector('.success')) {
     closeSuccess();
   }
 }
 
-function closeErrorEscEvtListener (evt) {
+function closeErrorEscClickHandler (evt) {
   if (evt.key === 'Escape' && document.querySelector('.error')) {
     closeError();
   }
 }
 
-function closeUploadEscEvtListener (evt) {
+function closeUploadEscClickHandler (evt) {
   if (evt.key === 'Escape') {
     if (document.querySelector('.success') || document.querySelector('.error')) {
       return;
