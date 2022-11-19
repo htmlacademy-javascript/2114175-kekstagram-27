@@ -1,11 +1,13 @@
+const SERVER = 'https://27.javascript.pages.academy';
+
 const loadPhotos = (onSuccess, onError) =>
-  fetch('https://27.javascript.pages.academy/kekstagram/data')
+  fetch(`${SERVER}/kekstagram/data`)
     .then((response) => response.json())
     .then(onSuccess)
     .catch(onError);
 
 const uploadPhoto = (formData, onSuccess, onError) =>
-  fetch('https://27.javascript.pages.academy/kekstagram', {
+  fetch(`${SERVER}/kekstagram`, {
     method: 'POST',
     body: formData,
   }).then((response) => {
