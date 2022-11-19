@@ -1,7 +1,7 @@
 # Личный проект «Кекстаграм»
 
 * Студент: [Родика Давлетшина](https://up.htmlacademy.ru/javascript/27/user/2114175).
-* Наставник: `Неизвестно`.
+* Наставник: [Анатолий Долгов](https://htmlacademy.ru/profile/dolgov_anatoly).
 
 ---
 
