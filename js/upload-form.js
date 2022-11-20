@@ -223,7 +223,7 @@ const closeForm = () => {
   // отмена события "закрытие формы по esc"
   document.body.removeEventListener('keydown', closeUploadEscClickHandler);
   // отмена события "закрытие формы по кнопке"
-  cancel.removeEventListener('keydown', closeForm);
+  cancel.removeEventListener('keydown', cancelClickHandler);
 };
 
 // открытие формы
@@ -237,13 +237,13 @@ const showForm = (file) => {
   // закрытие формы по esc
   document.body.addEventListener('keydown', closeUploadEscClickHandler);
   // закрытие формы по кнопке
-  cancel.addEventListener('click', closeForm);
+  cancel.addEventListener('click', cancelClickHandler);
 };
 
 // закрытие окна об успешной отправке
 const closeSuccess = () => {
   document.body.removeChild(document.querySelector('.success'));
-  document.body.removeEventListener('keydown', closeSuccessEscClickHandler);
+  document.body.removeEventListener('keydown', closeSuccessKeyDownClickHandler);
   cancel.click();
 };
 
@@ -260,15 +260,11 @@ const onSuccessSend = () => {
   document.body.appendChild(success);
 
   // событие на закрытие сообщения по esc
-  document.body.addEventListener('keydown', closeSuccessEscClickHandler);
+  document.body.addEventListener('keydown', closeSuccessKeyDownClickHandler);
 
   // закрытие сообщения
-  document.querySelector('.success').addEventListener('click', (evt) => {
-    if (evt.target === evt.currentTarget) {
-      closeSuccess();
-    }
-  });
-  document.querySelector('.success__button').addEventListener('click', closeSuccess);
+  document.querySelector('.success').addEventListener('click', outerSuccessClickHandler);
+  document.querySelector('.success__button').addEventListener('click', closeSuccessClickHandler);
 };
 
 // событие после ошибки отправки
@@ -281,12 +277,8 @@ const onErrorSend = () => {
   document.body.addEventListener('keydown', closeErrorEscClickHandler);
 
   // закрытие сообщения
-  document.querySelector('.error').addEventListener('click', (evt) => {
-    if (evt.target === evt.currentTarget) {
-      closeError();
-    }
-  });
-  document.querySelector('.error__button').addEventListener('click', closeError);
+  document.querySelector('.error').addEventListener('click', outerErrorClickHandler);
+  document.querySelector('.error__button').addEventListener('click', closeErrorClickHandler);
 };
 
 // отправка формы
@@ -342,19 +334,43 @@ const registerUploadFormEvents = () => {
   });
 };
 
-function closeSuccessEscClickHandler (evt) {
+function closeSuccessKeyDownClickHandler(evt) {
   if (evt.key === 'Escape' && document.querySelector('.success')) {
     closeSuccess();
   }
 }
 
-function closeErrorEscClickHandler (evt) {
+function outerSuccessClickHandler(evt) {
+  {
+    if (evt.target === evt.currentTarget) {
+      closeSuccess();
+    }
+  }
+}
+
+function closeSuccessClickHandler() {
+  closeSuccess();
+}
+
+function closeErrorEscClickHandler(evt) {
   if (evt.key === 'Escape' && document.querySelector('.error')) {
     closeError();
   }
 }
 
-function closeUploadEscClickHandler (evt) {
+function outerErrorClickHandler(evt) {
+  {
+    if (evt.target === evt.currentTarget) {
+      closeError();
+    }
+  }
+}
+
+function closeErrorClickHandler() {
+  closeError();
+}
+
+function closeUploadEscClickHandler(evt) {
   if (evt.key === 'Escape') {
     if (document.querySelector('.success') || document.querySelector('.error')) {
       return;
@@ -363,6 +379,10 @@ function closeUploadEscClickHandler (evt) {
       cancel.click();
     }
   }
+}
+
+function cancelClickHandler() {
+  closeForm();
 }
 
 export {registerUploadFormEvents};
