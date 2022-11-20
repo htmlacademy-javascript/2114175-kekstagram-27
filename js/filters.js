@@ -49,7 +49,7 @@ const filterPhotos = (photos) => {
       } while (renderPhotos.length < RANDOM_PHOTO_NUM);
       break;
     case FILTERS.DISCUSSED:
-      renderPhotos = [...photos].sort((a, b) => a.comments.length < b.comments.length);
+      renderPhotos = [...photos].sort((a, b) => b.comments.length - a.comments.length);
       break;
   }
   renderListing(renderPhotos);

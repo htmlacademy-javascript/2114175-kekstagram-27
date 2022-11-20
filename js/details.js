@@ -44,7 +44,7 @@ const showMoreComments = () => {
   }
 
   // скрываем "загрузить новые комментарии" если конец списка
-  if (showCommentsCounter === comments.length ) {
+  if (showCommentsCounter === comments.length) {
     bigPictureComLoader.classList.add('hidden');
   }
 };
@@ -54,9 +54,9 @@ const closeModal = () => {
   body.classList.remove('modal-open');
   bigPictureComLoader.classList.remove('hidden');
   bigPictureComCount.classList.remove('hidden');
-  document.body.removeEventListener('keydown', escClickHandler);
-  bigPictureClose.removeEventListener('click', closeModal);
-  bigPictureComLoader.removeEventListener('click', showMoreComments);
+  document.body.removeEventListener('keydown', escKeyDownHandler);
+  bigPictureClose.removeEventListener('click', closeModalClickHandler);
+  bigPictureComLoader.removeEventListener('click', showMoreCommentsClickHandler);
 };
 
 const showModal = (photo) => {
@@ -76,15 +76,24 @@ const showModal = (photo) => {
   showMoreComments();
 
   // добавляем событие за загрузку новых комментариев
-  bigPictureComLoader.addEventListener('click', showMoreComments);
+  bigPictureComLoader.addEventListener('click', showMoreCommentsClickHandler);
 
-  document.body.addEventListener('keydown', escClickHandler);
-  bigPictureClose.addEventListener('click', closeModal);
+  document.body.addEventListener('keydown', escKeyDownHandler);
+  bigPictureClose.addEventListener('click', closeModalClickHandler);
 };
-function escClickHandler (evt) {
+
+function escKeyDownHandler(evt) {
   if (evt.key === 'Escape') {
     closeModal();
   }
+}
+
+function showMoreCommentsClickHandler() {
+  showMoreComments();
+}
+
+function closeModalClickHandler() {
+  showMoreComments();
 }
 
 export {showModal};
